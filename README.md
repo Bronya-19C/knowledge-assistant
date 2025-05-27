@@ -2,4 +2,7 @@
 
 ## 环境要求
 
-- python 3.12.10
+- conda create -n agent python=3.10
+- conda activate agent
+- pip install camel-ai
+- pip install camel-ai[all] 
