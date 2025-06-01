@@ -20,4 +20,6 @@
   
   -- pip install camel-ai
   
-  -- pip install camel-ai[all] 
+  -- pip install camel-ai[all]
+
+  -- pip install PySide6
