@@ -1,0 +1,2 @@
+见Test.py
+InfoReader为函数对象，input为输入文本，返回一个json对象，传入Image中的InteractiveMindMap对象，该对象调用run函数即可生成思维导图
