@@ -34,8 +34,19 @@ class MemoryStore:
         if os.path.exists(path):
             with open(path, 'r', encoding='utf-8') as f:
                 self.data = json.load(f)
+            # 确保所有字段存在
+            self.data.setdefault('domains', [])
+            self.data.setdefault('documents', [])
+            self.data.setdefault('questions', [])
         else:
-            self.data = {'documents': [], 'questions': []}
+            # 初始化包括 domains 的数据结构
+            self.data = {'domains': [], 'documents': [], 'questions': []}
+            self._save()
+
+    def add_domain(self, domain):
+        if domain and domain not in self.data['domains']:
+            self.data['domains'].append(domain)
+            self._save()
 
     def add_document(self, text):
         self.data['documents'].append(text)
@@ -46,9 +57,15 @@ class MemoryStore:
         self._save()
 
     def get_context(self):
-        docs = '\n'.join(self.data['documents'])
-        qs = '\n'.join(self.data['questions'])
-        return f'已提交文档：\n{docs}\n已提问问题：\n{qs}'
+        # 将 domains, documents, questions 一并作为上下文
+        domains = '\n'.join(self.data.get('domains', []))
+        docs = '\n'.join(self.data.get('documents', []))
+        qs = '\n'.join(self.data.get('questions', []))
+        return (
+            f'已了解知识领域：\n{domains}\n'
+            f'已提交文档：\n{docs}\n'
+            f'已提问问题：\n{qs}'
+        )
 
     def _save(self):
         with open(self.path, 'w', encoding='utf-8') as f:
@@ -56,11 +73,11 @@ class MemoryStore:
 
 class LearningAgent:
     def __init__(self, api_key):
-        # 系统角色调整为面向学生的全面提纲需求
+        # 主 Agent：生成面向学生的全面提纲
         sys_msg = (
-            '你是一个学习助手，请用简洁的中文，根据学生身份，'  
-            '为学生生成面向学习的全面提纲，包括各章节或板块名称及对应主要知识点摘要，'  
-            '不要输出教学目标、课时安排或其他教学设计等老师视角的内容。'
+            '你是一个学习助手，请用简洁的中文，根据学生身份，'
+            '为学生生成面向学习的全面提纲，包括各章节或板块名称及对应主要知识点摘要，'
+            '不要输出教学目标、课时安排或其他教学设计内容。'
         )
         model = ModelFactory.create(
             model_platform=ModelPlatformType.SILICONFLOW,
@@ -70,8 +87,19 @@ class LearningAgent:
         )
         self.agent = ChatAgent(system_message=sys_msg, model=model, output_language='中文')
 
+    def extract_domains(self, content, memory_context):
+        # 使用主 Agent 提取该文档的知识领域
+        prompt = (
+            f"{memory_context}\n"
+            f"请从以下内容中提取简洁的知识领域关键词列表（以逗号或换行分隔）：\n{content}"
+        )
+        resp = self.agent.step(prompt).msg.content
+        # 粗略拆分关键词
+        domains = [d.strip() for d in resp.replace('，', ',').split(',') if d.strip()]
+        return domains
+
     def generate_outline(self, content, memory_context):
-        # 提示词调整为生成全面学习提纲
+        # 生成学生全面学习提纲
         prompt = (
             f"{memory_context}\n"
             f"请根据以下内容，为学生生成全面的学习提纲，列出每个章节或板块标题及其主要知识点：\n{content}"
@@ -80,7 +108,7 @@ class LearningAgent:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='加载文档并为学生生成全面学习提纲'
+        description='加载文档并为学生生成全面学习提纲，并记忆知识领域'
     )
     parser.add_argument('files', nargs='+', help='输入文件路径，支持 txt/docx/pptx')
     parser.add_argument('--api_key', required=True, help='SiliconFlow API 密钥')
@@ -90,11 +118,17 @@ if __name__ == '__main__':
     mem = MemoryStore()
     agent = LearningAgent(api_key=args.api_key)
 
+    # 逐个加载文档，记忆知识领域
     for path in args.files:
         print(f"加载文件: {path}")
         text = loader.load(path)
         mem.add_document(text)
+        # 提取并记忆该文档的知识领域
+        domains = agent.extract_domains(text, mem.get_context())
+        for d in domains:
+            mem.add_domain(d)
 
+    # 使用最后一个文档生成提纲
     content = mem.data['documents'][-1]
     outline = agent.generate_outline(content, mem.get_context())
     print("学生学习提纲:")
