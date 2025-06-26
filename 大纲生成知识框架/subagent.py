@@ -56,7 +56,7 @@ class DocumentGenerator:
         # 创建分解任务消息
         decomposition_task = BaseMessage(
             role_name="任务协调员",
-            content=f"请将以下文档大纲分解为独立的章节部分，输出JSON格式：\n\n{outline}",
+            content=f"请将以下文档大纲分解为独立的章节部分，以JSON格式输出：\n\n{outline}",
             role_type=RoleType.USER,
             meta_dict={}
         )
@@ -98,22 +98,42 @@ class DocumentGenerator:
         print(f"成功分解为 {len(sections)} 个部分")
         return sections
 
-    def generate_section(self, section_id: str, section_spec: dict):
+    def generate_section(self, section_id: str, section_spec: dict | str):
         """为指定部分生成内容"""
         if section_id in self.generated_sections:
             print(f"部分 {section_id} 已生成，跳过")
             return self.generated_sections[section_id]
 
-        print(f"生成部分: {section_id} - {section_spec.get('title', '无标题')}")
+        # 如果section_spec是字符串，则将其视为内容，并创建一个临时字典
+        if isinstance(section_spec, str):
+            print(f"生成部分: {section_id} - 无标题 (内容为字符串)")
+            # 创建临时字典，包含默认标题和内容
+            section_spec = {
+                'title': f"部分_{section_id}",
+                'content': section_spec  # 注意：这里的内容是原始字符串，但在生成时我们需要用它来作为要求吗？
+            }
+        else:
+            # 如果是字典，正常打印标题
+            print(f"生成部分: {section_id} - {section_spec.get('title', '无标题')}")
+
+        # 现在section_spec已经确保是字典，我们从中提取信息用于生成任务
+        # 但是，有可能字典中没有'title'键，所以使用get
+        title = section_spec.get('title', '无标题')
+        requirements = section_spec.get('requirements', '无特殊要求')
+        length = section_spec.get('length', '约500字')
+        key_points = section_spec.get('key_points', [])
+        # 注意：如果传入的section_spec中原本就有内容，我们是否需要将其作为上下文？
+        # 根据生成任务的设计，我们可能希望将内容要求传递给生成模型
+        # 但这里我们只使用标题、要求、长度和关键点
 
         # 创建生成任务消息
         generation_task = BaseMessage(
             role_name="文档架构师",
             content=(
-                f"请为文档的 '{section_spec['title']}' 部分生成内容。\n"
-                f"要求:\n{section_spec.get('requirements', '无特殊要求')}\n"
-                f"长度: {section_spec.get('length', '约500字')}\n"
-                f"关键点: {', '.join(section_spec.get('key_points', []))}"
+                f"请为文档的 '{title}' 部分生成内容。\n"
+                f"要求:\n{requirements}\n"
+                f"长度: {length}\n"
+                f"关键点: {', '.join(key_points) if isinstance(key_points, list) else key_points}"
             ),
             role_type=RoleType.USER,
             meta_dict={}
@@ -130,7 +150,7 @@ class DocumentGenerator:
 
         # 存储生成结果
         self.generated_sections[section_id] = {
-            "title": section_spec["title"],
+            "title": title,
             "content": generated_content
         }
 
@@ -146,11 +166,18 @@ class DocumentGenerator:
         full_document = []
         for section_id, section_spec in sections.items():
             content = self.generate_section(section_id, section_spec)
-            full_document.append({
-                "section_id": section_id,
-                "title": section_spec["title"],
-                "content": content
-            })
+            if isinstance(section_spec,str):
+                full_document.append({
+                    "section_id": section_id,
+                    "title": "None",
+                    "content": content
+                })
+            else:
+                full_document.append({
+                    "section_id": section_id,
+                    "title": section_spec["title"],
+                    "content": content
+                })
             # 添加延迟避免API速率限制
             time.sleep(1)
 
@@ -171,10 +198,10 @@ def create(outline):
     # 初始化文档生成系统
     model = ModelFactory.create(
         model_platform=ModelPlatformType.SILICONFLOW,
-        model_type=ModelType.SILICONFLOW_QWEN2_5_72B_INSTRUCT,  # 可选模型：DeepSeek-V3/R1 等
+        model_type=ModelType.SILICONFLOW_DEEPSEEK_V3,  # 可选模型：DeepSeek-V3/R1 等
         model_config_dict=SiliconFlowConfig(
             temperature=0.3,  # 控制生成随机性 (0~1)
-            max_tokens=4000,
+            max_tokens=8000,
             stream=True
         ).as_dict(),
         api_key='sk-qseennfhdprismchczwnkzpohyjmuwgpiaywuclsisgugfvo',  # 替换为你的 API 密钥
