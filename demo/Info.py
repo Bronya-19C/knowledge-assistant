@@ -3,6 +3,7 @@ from camel.agents import ChatAgent
 from camel.configs import SiliconFlowConfig
 from camel.models import ModelFactory
 from camel.types import ModelPlatformType
+from config import API_KEY
 import json
 class InfoReader:
     def __init__(self,input_message=''):
@@ -14,7 +15,7 @@ class InfoReader:
                 temperature=0.3,
                 # max_tokens=2048
             ).as_dict(),
-            api_key='sk-qseennfhdprismchczwnkzpohyjmuwgpiaywuclsisgugfvo'
+            api_key=API_KEY
         )
         #self.sys_msg = "你是一个文本总结器"
         # self.InfoReader_agent = ChatAgent(

@@ -91,7 +91,7 @@ class LearningAgent:
         resp = self.agent.step(prompt).msg.content
         # 粗略拆分关键词
         domains = [d.strip() for d in resp.replace('，', ',').split(',') if d.strip()]
-        time.sleep(60)
+        time.sleep(30)
         return domains
 
     def generate_outline(self, content, memory_context):

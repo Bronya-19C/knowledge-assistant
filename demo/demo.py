@@ -19,7 +19,7 @@ from subagent import create
 from Info import InfoReader
 from Image import InteractiveMindMap
 
-APIKEY = 'sk-qseennfhdprismchczwnkzpohyjmuwgpiaywuclsisgugfvo'
+from config import API_KEY
 
 # 初始化dot.exe所在目录
 os.environ["PATH"] += os.pathsep + r'D:\study\2025spring\ai basic\bighw\test\Graphviz-13.0.1-win64\bin'
@@ -33,7 +33,7 @@ model = ModelFactory.create(
         temperature=0.3,  # 控制生成随机性 (0~1)
         # max_tokens=2048   # 最大输出长度
     ).as_dict(),
-    api_key=APIKEY  # 替换为你的 API 密钥
+    api_key=API_KEY  # 替换为你的 API 密钥
 )
 
 # --------------------- 模型层：Agent封装 ---------------------
@@ -41,7 +41,7 @@ class CamelAIAgent:
     def __init__(self):
         self.loader = learning_assistant.DocumentLoader()
         self.mem = learning_assistant.MemoryStore()
-        self.agent = learning_assistant.LearningAgent(api_key=APIKEY)
+        self.agent = learning_assistant.LearningAgent(api_key=API_KEY)
         self.Reader=InfoReader()
     
     def process_document(self, file_path):

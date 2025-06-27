@@ -7,7 +7,7 @@ from camel.configs import SiliconFlowConfig
 import re
 import json
 import time
-
+from config import API_KEY
 
 
 
@@ -52,9 +52,9 @@ class DocumentGenerator:
 
         # 创建生成Agent
         self.generator = RolePlaying(
-            assistant_role_name="内容撰写专家",
+            assistant_role_name="会严格遵守字数要求的内容撰写专家",
             user_role_name="文档架构师",
-            task_prompt="文档架构师会给出文档若干个独立的部分，内容撰写专家根据要求对各个部分生成相应的文档内容，他只会按照要求回答生成的对应内容，不会多说话",
+            task_prompt="文档架构师会给出文档若干个独立的部分，内容撰写专家根据要求对各个部分生成相应的文档内容，他只会严格按照要求回答生成的对应内容（要求包括：生成的主题，方向，字数限制，关键点覆盖），不会多说话",
             assistant_agent_kwargs={"model": generator_model},
             user_agent_kwargs={"model": generator_model},
             with_task_specify=False,
@@ -153,7 +153,7 @@ class DocumentGenerator:
             content=(
                 f"请为文档的 '{title}' 部分生成内容。\n"
                 f"要求:\n{requirements}\n"
-                f"长度: {length}\n"
+                f"字数限制: {length}\n"
                 f"关键点: {', '.join(key_points) if isinstance(key_points, list) else key_points}"
             ),
             role_type=RoleType.USER,
@@ -185,6 +185,7 @@ class DocumentGenerator:
         """生成完整文档"""
         # 步骤1: 分解大纲
         sections = self.decompose_outline(outline)
+        time.sleep(30)
 
         # 步骤2: 按顺序生成各部分内容
         full_document = []
@@ -228,7 +229,7 @@ def create(outline):
             # max_tokens=8000,
             stream=True
         ).as_dict(),
-        api_key='sk-qseennfhdprismchczwnkzpohyjmuwgpiaywuclsisgugfvo',  # 替换为你的 API 密钥
+        api_key=API_KEY,  # 替换为你的 API 密钥
         url='https://api.siliconflow.cn/v1'
     )
 
