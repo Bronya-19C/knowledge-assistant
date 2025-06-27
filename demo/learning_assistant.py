@@ -2,6 +2,7 @@
 import os
 import json
 import argparse
+import time
 from docx import Document
 from pptx import Presentation
 from camel.agents import ChatAgent
@@ -90,6 +91,7 @@ class LearningAgent:
         resp = self.agent.step(prompt).msg.content
         # 粗略拆分关键词
         domains = [d.strip() for d in resp.replace('，', ',').split(',') if d.strip()]
+        time.sleep(60)
         return domains
 
     def generate_outline(self, content, memory_context):
