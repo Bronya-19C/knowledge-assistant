@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QPushButton, QLabel, QTextEdit, 
                              QFileDialog, QProgressBar, QSplitter, QFrame,
                              QTabWidget, QGridLayout, QGroupBox, QRadioButton, QFileDialog, QMessageBox)
-from PySide6.QtCore import Qt, QThread, Signal, QUrl
+from PySide6.QtCore import Qt, QThread, Signal, QUrl, QTimer
 from PySide6.QtGui import QPixmap, QIcon, QTextCursor
 import graphviz
 
@@ -157,6 +157,14 @@ class GUI(QMainWindow):
         
         self.agent = CamelAIAgent()
         self.current_task_thread = None
+        # 用于文本动画的定时器
+        self.typing_timer = QTimer(self)
+        self.typing_timer.timeout.connect(self.update_typing_text)
+        self.typing_data = {
+            'full_text': '',      # 完整文本
+            'current_text': '',   # 当前已显示的文本
+            'index': 0,           # 当前字符索引
+        }
         self.setup_ui()
     
     def setup_ui(self):
@@ -288,9 +296,6 @@ class GUI(QMainWindow):
     
     def handle_task_result(self, result):
         self.progress_bar.setValue(100)
-        self.read_btn.setEnabled(True)
-        self.mind_map_btn.setEnabled(True)
-        self.forget_btn.setEnabled(True)
         
         if result["type"] == "document":
             content = result["data"]
@@ -298,6 +303,12 @@ class GUI(QMainWindow):
             self.text_result.setHtml(html_content)
             self.result_tab.setCurrentIndex(0)
             self.add_chat_message("系统", f"已生成文档，共{len(content.split())}个单词")
+            # 配置打字机效果参数
+            self.typing_data['full_text'] = content
+            self.typing_data['current_text'] = ''
+            self.typing_data['index'] = 0
+            # 启动文本动画
+            self.typing_timer.start(50)  # 每50ms显示一个字符
         
         elif result["type"] == "mind_map":
             self.result_tab.removeTab(1)
@@ -325,8 +336,25 @@ class GUI(QMainWindow):
             self.mind_map_display.setStyleSheet("border: 1px dashed #ccc; padding: 20px;")
             self.result_tab.addTab(self.mind_map_display, "思维导图")
             self.add_chat_message("系统", f"记忆已清除完毕！")
-                
             
+        self.read_btn.setEnabled(True)
+        self.mind_map_btn.setEnabled(True)
+        self.forget_btn.setEnabled(True)
+                
+    def update_typing_text(self):
+        # 逐字模式
+        if self.typing_data['index'] < len(self.typing_data['full_text']):
+            self.typing_data['current_text'] += self.typing_data['full_text'][self.typing_data['index']]
+            self.typing_data['index'] += 1
+            
+            # 将当前文本转换为HTML并显示
+            html_content = markdown.markdown(self.typing_data['current_text'])
+            self.text_result.setHtml(html_content)
+            
+            # 滚动到底部
+            self.text_result.moveCursor(QTextCursor.End)
+        else:
+            self.typing_timer.stop()  # 完成后停止计时器        
     
     def show_error(self, error_msg):
         self.progress_bar.setValue(0)
