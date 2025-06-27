@@ -16,10 +16,8 @@
   
   -- 激活虚拟环境`.\venv\Scripts\activate.bat`
 
-- 在该虚拟环境下，依次运行
+- 在该虚拟环境下，运行
   
-  -- pip install camel-ai
-  
-  -- pip install camel-ai[all]
+  -- pip install camel-ai[all] PySide6 matplotlib markdown networkx python-docx python-pptx 
 
-  -- pip install PySide6
+## 应用本体是整个demo文件夹
