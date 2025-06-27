@@ -204,7 +204,7 @@ def create(outline):
             max_tokens=8000,
             stream=True
         ).as_dict(),
-        api_key='sk-qseennfhdprismchczwnkzpohyjmuwgpiaywuclsisgugfvo',  # 替换为你的 API 密钥
+        api_key=pass,  # 替换为你的 API 密钥
         url='https://api.siliconflow.cn/v1'
     )
 
