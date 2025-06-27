@@ -1,32 +1,18 @@
 import sys
 import os
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-import networkx as nx
-import matplotlib.patches as patches
-import matplotlib.font_manager as fm
-import platform
-import math
 import markdown
-import threading
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QPushButton, QLabel, QTextEdit, 
-                             QFileDialog, QProgressBar, QSplitter, QFrame,
-                             QTabWidget, QGridLayout, QGroupBox, QRadioButton, QFileDialog, QMessageBox)
-from PySide6.QtCore import Qt, QThread, Signal, QUrl, QTimer
-from PySide6.QtGui import QPixmap, QIcon, QTextCursor
-import graphviz
+                             QFileDialog, QProgressBar, QSplitter,
+                             QTabWidget, QGroupBox, QFileDialog)
+from PySide6.QtCore import Qt, QThread, Signal, QTimer
+from PySide6.QtGui import QTextCursor
 
-from camel.agents import ChatAgent, TaskPlannerAgent
 from camel.configs import SiliconFlowConfig
 from camel.models import ModelFactory
 from camel.types import ModelPlatformType
 
-from typing import List, Dict, Tuple
-from pptx import Presentation
-from docx import Document
 import time
-import json
 
 import learning_assistant
 from subagent import create
@@ -336,7 +322,7 @@ class GUI(QMainWindow):
             self.mind_map_display.setStyleSheet("border: 1px dashed #ccc; padding: 20px;")
             self.result_tab.addTab(self.mind_map_display, "思维导图")
             self.add_chat_message("系统", f"记忆已清除完毕！")
-            
+
         self.read_btn.setEnabled(True)
         self.mind_map_btn.setEnabled(True)
         self.forget_btn.setEnabled(True)
