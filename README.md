@@ -2,7 +2,7 @@
 
 这是基于python3.10，使用camel-ai的agent，用Pyside6编写GUI制作而成的知识助手。
 
-支持用户传入pptx,word,txt格式的文档，并以md格式或者可交互式的思维导图的形式输出。
+支持用户传入pptx,docx,txt格式的文档，并以markdown或者可交互思维导图的形式输出。
 
 # 安装
 
