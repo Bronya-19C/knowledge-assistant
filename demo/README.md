@@ -1,6 +1,6 @@
 先下载整个文件夹
 
-在config.py中输入硅基流动的api_key
+# 在config.py中输入硅基流动的api_key
 
 然后命令行中将目录定位到 demo.py 所在文件夹，并输入下面的命令：
 
