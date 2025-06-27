@@ -14,7 +14,7 @@ class InfoReader:
                 temperature=0.3,
                 max_tokens=2048
             ).as_dict(),
-            api_key='sk-qseennfhdprismchczwnkzpohyjmuwgpiaywuclsisgugfvo'
+            api_key=pass
         )
         #self.sys_msg = "你是一个文本总结器"
         # self.InfoReader_agent = ChatAgent(
