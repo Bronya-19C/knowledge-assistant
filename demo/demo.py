@@ -31,7 +31,7 @@ model = ModelFactory.create(
     model_config_dict=SiliconFlowConfig(
         stream=True,      # !!!!!!!!!!!!!!!!!!!!!!!!!
         temperature=0.3,  # 控制生成随机性 (0~1)
-        max_tokens=2048   # 最大输出长度
+        # max_tokens=2048   # 最大输出长度
     ).as_dict(),
     api_key=APIKEY  # 替换为你的 API 密钥
 )
@@ -137,7 +137,7 @@ class ProcessTaskThread(QThread):
 class GUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CAMEL-AI 文档智能处理系统")
+        self.setWindowTitle("知识助手")
         self.setGeometry(100, 100, 1000, 700)
         self.file_path = ''
         
