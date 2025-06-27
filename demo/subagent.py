@@ -203,7 +203,7 @@ class DocumentGenerator:
                     "content": content
                 })
             # 添加延迟避免API速率限制
-            time.sleep(1)
+            time.sleep(20)
 
         # 步骤3: 组合完整文档
         return self._assemble_document(full_document)
