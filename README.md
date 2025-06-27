@@ -18,6 +18,6 @@
 
 - 在该虚拟环境下，运行
   
-  -- pip install camel-ai[all] PySide6 matplotlib markdown networkx python-docx python-pptx 
+  -- pip install camel-ai camel-ai[all] PySide6 matplotlib markdown networkx python-docx python-pptx 
 
 ## 应用本体是整个demo文件夹
